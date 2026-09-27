@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Sigma5",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "main.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "never",
+                // "revealProblems": "onProblem",
+                "echo": false,
+                "focus": false,
+                "showReuseMessage": false,
+                "panel": "new",
+                "close": true,
+            }
+        },
+    ]
+}
