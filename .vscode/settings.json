@@ -1,3 +1,8 @@
 {
     "mySettings.enableSigma5Keys": true,
+    "files.exclude": {
+        "__pycache__": true,
+        "**.spec": true,
+        "build": true,
+    },
 }

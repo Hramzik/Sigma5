@@ -8,7 +8,6 @@ from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
-    QFileDialog,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -21,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from puzzle import Puzzle
 from imgur_client import ImagePickerDialog
+from machine_art import MachineArtDialog
 
 
 class BoardWidget(QWidget):
@@ -162,7 +162,7 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.gap_box)
         controls.addWidget(QLabel("Режим:"))
         self.mode_box = QComboBox()
-        self.mode_box.addItems(["Числа", "Изображение"])
+        self.mode_box.addItems(["Числа", "Изображение", "Machine Art"])
         self.mode_box.currentIndexChanged.connect(self.change_mode)
         controls.addWidget(self.mode_box)
         self.image_button = QPushButton("Найти изображение Openverse…")
@@ -203,6 +203,12 @@ class MainWindow(QMainWindow):
         self.board.update()
 
     def change_mode(self, index: int) -> None:
+        if index == 2:
+            self.image_mode = True
+            self.image_button.setEnabled(False)
+            self.open_machine_art()
+            self.board.update()
+            return
         self.image_mode = index == 1
         self.image_button.setEnabled(self.image_mode)
         self.board.update()
@@ -211,6 +217,23 @@ class MainWindow(QMainWindow):
         dialog = ImagePickerDialog(self)
         dialog.image_selected.connect(self.set_image)
         dialog.exec()
+
+    def open_machine_art(self) -> None:
+        dialog = MachineArtDialog(self.game.size, self)
+        if dialog.exec() == dialog.DialogCode.Accepted and dialog.result_image is not None:
+            self.source_image = QPixmap.fromImage(dialog.result_image).scaled(
+                800, 800, Qt.AspectRatioMode.IgnoreAspectRatio,
+                Qt.TransformationMode.SmoothTransformation)
+            self.image_mode = True
+            self.status.setText("Создано изображение Machine Art.")
+            self.shuffle()
+        elif self.mode_box.currentIndex() == 2:
+            self.mode_box.blockSignals(True)
+            self.mode_box.setCurrentIndex(0)
+            self.mode_box.blockSignals(False)
+            self.image_mode = False
+            self.image_button.setEnabled(False)
+            self.board.update()
 
     def set_image(self, pixmap: QPixmap, image_id: str) -> None:
         if pixmap.isNull():
