@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from puzzle import Puzzle
 from imgur_client import ImagePickerDialog
 from machine_art import MachineArtDialog
+from waifu_client import WaifuPickerDialog
 
 
 class BoardWidget(QWidget):
@@ -137,7 +138,7 @@ class BoardWidget(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Пятнашки")
+        self.setWindowTitle("Пятнашки by VladZ")
         self.game = Puzzle(4)
         self.image_mode = False
         self.moves_made = False
@@ -162,7 +163,7 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.gap_box)
         controls.addWidget(QLabel("Режим:"))
         self.mode_box = QComboBox()
-        self.mode_box.addItems(["Числа", "Изображение", "Machine Art"])
+        self.mode_box.addItems(["Числа", "Изображение", "Machine Art", "Waifu.im"])
         self.mode_box.currentIndexChanged.connect(self.change_mode)
         controls.addWidget(self.mode_box)
         self.image_button = QPushButton("Найти изображение Openverse…")
@@ -186,7 +187,7 @@ class MainWindow(QMainWindow):
         if self.game.is_solved() and self.moves_made:
             self.moves_made = False
             self.status.setText("Победа! Поле собрано.")
-            QMessageBox.information(self, "Пятнашки", "Поздравляем, вы собрали поле!")
+            QMessageBox.information(self, "Message from Xi Pinpin", "Партия гордится вами!")
         elif not self.game.is_solved():
             self.status.setText("Игра продолжается.")
 
@@ -209,6 +210,12 @@ class MainWindow(QMainWindow):
             self.open_machine_art()
             self.board.update()
             return
+        if index == 3:
+            self.image_mode = True
+            self.image_button.setEnabled(False)
+            self.open_waifu_picker()
+            self.board.update()
+            return
         self.image_mode = index == 1
         self.image_button.setEnabled(self.image_mode)
         self.board.update()
@@ -217,6 +224,17 @@ class MainWindow(QMainWindow):
         dialog = ImagePickerDialog(self)
         dialog.image_selected.connect(self.set_image)
         dialog.exec()
+
+    def open_waifu_picker(self) -> None:
+        dialog = WaifuPickerDialog(self)
+        dialog.image_selected.connect(self.set_image)
+        if dialog.exec() != dialog.DialogCode.Accepted and self.mode_box.currentIndex() == 3:
+            self.mode_box.blockSignals(True)
+            self.mode_box.setCurrentIndex(0)
+            self.mode_box.blockSignals(False)
+            self.image_mode = False
+            self.image_button.setEnabled(False)
+            self.board.update()
 
     def open_machine_art(self) -> None:
         dialog = MachineArtDialog(self.game.size, self)

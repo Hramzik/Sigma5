@@ -4,5 +4,7 @@
         "__pycache__": true,
         "**.spec": true,
         "build": true,
+        "requirements.txt": true,
+        "REQUIREMENTS.md": true
     },
 }
